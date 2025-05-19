@@ -1,32 +1,58 @@
-import { useState } from "react";
 import EachContact from "./EachContact";
 import { useNavigate } from "react-router-dom";
+import ConfirmDelete from "./ConfirmDelete";
+import { useState } from "react";
 
-export default function ContactList() {
-  const [Contacts, setContacts] = useState([]);
+export default function ContactList({ contacts, setContacts }) {
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [contactToDelete, setContactToDelete] = useState(null);
+
+  const handleClickDelete = (id) => {
+    setContactToDelete(id);
+    setShowConfirm(true);
+  };
 
   const takeToAddContact = () => {
     navigate("/addcontact");
   };
 
   return (
-    <div className="flex-col flex justify-center items-center gap-10 pt-10">
-      <button
-        onClick={takeToAddContact}
-        className="text-white px-1 py-0.5 bg-blue-500 rounded"
-      >
-        Add Contact
-      </button>
+    <div className="p-10 flex flex-col gap-8 min-h-screen bg-gray-50">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-800">My Contacts</h1>
+        <button
+          onClick={takeToAddContact}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
+        >
+          + Add Contact
+        </button>
+      </div>
 
-      <h1>Contacts:</h1>
-
-      {Contacts.length === 0 ? (
-        <h1>No Contacts Yet</h1>
-      ) : (
-        <div className="flex">
-          <EachContact Contacts={Contacts} />
+      {contacts.length === 0 ? (
+        <div className="text-center text-gray-500 mt-10 text-xl">
+          No contacts available. Start by adding one.
         </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <EachContact contacts={contacts} onDelete={handleClickDelete} />
+        </div>
+      )}
+
+      {showConfirm && (
+        <ConfirmDelete
+          onConfirm={() => {
+            setContacts(
+              contacts.filter((contact) => contact.id !== contactToDelete)
+            );
+            setShowConfirm(false);
+            setContactToDelete(null);
+          }}
+          onCancel={() => {
+            setShowConfirm(false);
+            setContactToDelete(null);
+          }}
+        />
       )}
     </div>
   );
