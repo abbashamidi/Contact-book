@@ -1,10 +1,4 @@
-export default function EachContact({ contacts, onDelete }) {
-
-
-
-
-
-
+export default function EachContact({ contacts, onDelete,onEdit }) {
 
   return (
     <>
@@ -20,13 +14,21 @@ export default function EachContact({ contacts, onDelete }) {
             <strong>Phone:</strong> {contact.PhoneNumber}
           </p>
           <p className="text-gray-600">
-            <strong>City:</strong> {contact.City}
+            <strong>City:</strong> {contact.City?.trim() || "?"}
           </p>
           <p className="text-gray-600 mt-2 whitespace-pre-line">
             <strong>About:</strong> {contact.Description || "No description"}
           </p>
           <div className="flex gap-1 mt-2">
-            <button onClick={() => onDelete(contact.id)} className="bg-red-500 text-white px-2 w-16 rounded-lg py-1">Delete</button> <button className="bg-blue-500 text-white px-2 w-16 rounded-lg py-1">Edit</button>
+            <button
+              onClick={() => onDelete(contact.id)}
+              className="bg-red-500 text-white px-2 w-16 rounded-lg py-1"
+            >
+              Delete
+            </button>{" "}
+            <button className="bg-blue-500 text-white px-2 w-16 rounded-lg py-1" onClick={() => onEdit(contact)}>
+              Edit
+            </button>
           </div>
         </div>
       ))}

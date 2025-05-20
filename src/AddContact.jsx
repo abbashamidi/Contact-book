@@ -6,6 +6,8 @@ export default function AddContact({ contacts, setContacts }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [city, setCity] = useState("");
   const [description, setDescription] = useState("");
+  const [fullNameError, setFullNameError] = useState("");
+  const [phoneNumerError, setPhoneNumberError] = useState("");
 
   const navigate = useNavigate();
 
@@ -17,14 +19,18 @@ export default function AddContact({ contacts, setContacts }) {
       City: city,
       Description: description,
     };
-    setContacts([...contacts, newContact]);
-
-    setFullName("");
-    setPhoneNumber("");
-    setCity("");
-    setDescription("");
-
-    navigate("/contactList")
+    if (fullName.trim() === "") {
+      setFullNameError("Field required !");
+    } else if (phoneNumber.trim() === "") {
+      setPhoneNumberError("Field required !");
+    } else {
+      setContacts([...contacts, newContact]);
+      setFullName("");
+      setPhoneNumber("");
+      setCity("");
+      setDescription("");
+      navigate("/contactList");
+    }
   };
 
   return (
@@ -44,6 +50,7 @@ export default function AddContact({ contacts, setContacts }) {
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
               placeholder="Enter full name"
             />
+            <span className="text-sm text-red-500">{fullNameError}</span>
           </div>
 
           <div>
@@ -55,6 +62,7 @@ export default function AddContact({ contacts, setContacts }) {
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
               placeholder="Enter phone number"
             />
+            <span className="text-sm text-red-500">{phoneNumerError}</span>
           </div>
 
           <div>

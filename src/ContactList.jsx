@@ -2,15 +2,31 @@ import EachContact from "./EachContact";
 import { useNavigate } from "react-router-dom";
 import ConfirmDelete from "./ConfirmDelete";
 import { useState } from "react";
+import EditComp from "./EditComp";
 
 export default function ContactList({ contacts, setContacts }) {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
   const [contactToDelete, setContactToDelete] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [contactToEdit, setContactToEdit] = useState(null);
 
   const handleClickDelete = (id) => {
     setContactToDelete(id);
     setShowConfirm(true);
+  };
+
+  const handleEditClick = (contact) => {
+    setContactToEdit(contact);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = (updatedContact) => {
+    setContacts((prev) =>
+      prev.map((c) => (c.id === updatedContact.id ? updatedContact : c))
+    );
+    setIsEditing(false);
+    setContactToEdit(null);
   };
 
   const takeToAddContact = () => {
@@ -35,7 +51,11 @@ export default function ContactList({ contacts, setContacts }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <EachContact contacts={contacts} onDelete={handleClickDelete} />
+          <EachContact
+            contacts={contacts}
+            onDelete={handleClickDelete}
+            onEdit={handleEditClick}
+          />
         </div>
       )}
 
@@ -51,6 +71,17 @@ export default function ContactList({ contacts, setContacts }) {
           onCancel={() => {
             setShowConfirm(false);
             setContactToDelete(null);
+          }}
+        />
+      )}
+
+      {isEditing && (
+        <EditComp
+          contactToEdit={contactToEdit}
+          onSave={handleSaveEdit}
+          onCancel={() => {
+            setIsEditing(false);
+            setContactToEdit(null);
           }}
         />
       )}
