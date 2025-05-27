@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ConfirmDelete from "./ConfirmDelete";
 import { useState } from "react";
 import EditComp from "./EditComp";
+import SearchModal from "./SearchModal";
 
 export default function ContactList({ contacts, setContacts }) {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function ContactList({ contacts, setContacts }) {
   const [contactToDelete, setContactToDelete] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [contactToEdit, setContactToEdit] = useState(null);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   const handleClickDelete = (id) => {
     setContactToDelete(id);
@@ -37,12 +39,20 @@ export default function ContactList({ contacts, setContacts }) {
     <div className="p-10 flex flex-col gap-8 min-h-screen bg-gray-50">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-800">My Contacts</h1>
-        <button
-          onClick={takeToAddContact}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
-        >
-          + Add Contact
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={takeToAddContact}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
+          >
+            + Add Contact
+          </button>
+          <button
+            onClick={() => setShowSearchModal(true)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow transition"
+          >
+            Search Contact
+          </button>
+        </div>
       </div>
 
       {contacts.length === 0 ? (
@@ -85,6 +95,12 @@ export default function ContactList({ contacts, setContacts }) {
           }}
         />
       )}
+
+      <SearchModal
+        isVisible={showSearchModal}
+        contacts={contacts}
+        onClose={() => setShowSearchModal(false)}
+      />
     </div>
   );
 }

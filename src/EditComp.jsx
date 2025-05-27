@@ -1,24 +1,30 @@
 import { useState } from "react";
 
 export default function EditComp({ onSave, onCancel, contactToEdit }) {
-  const [name, setName] = useState(contactToEdit?.Name || "");
-  const [phoneNumber, setPhoneNumber] = useState(
-    contactToEdit?.PhoneNumber || ""
-  );
+  const [name, setName] = useState(contactToEdit.Name);
+  const [phoneNumber, setPhoneNumber] = useState(contactToEdit.PhoneNumber);
   const [city, setCity] = useState(contactToEdit?.City || "");
   const [description, setDescription] = useState(
     contactToEdit?.Description || ""
   );
+  const [nameError, setNameError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
 
   const handleSave = () => {
-    const updatedContact = {
-      ...contactToEdit,
-      Name: name.trim(),
-      PhoneNumber: phoneNumber.trim(),
-      City: city.trim(),
-      Description: description.trim(),
-    };
-    onSave(updatedContact);
+    if (name.trim() === "") {
+      setNameError("Field required !");
+    } else if (phoneNumber.trim() === "") {
+      setPhoneNumberError("Field required !");
+    } else {
+      const updatedContact = {
+        ...contactToEdit,
+        Name: name.trim(),
+        PhoneNumber: phoneNumber.trim(),
+        City: city.trim(),
+        Description: description.trim(),
+      };
+      onSave(updatedContact);
+    }
   };
 
   return (
@@ -37,6 +43,7 @@ export default function EditComp({ onSave, onCancel, contactToEdit }) {
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
             />
+            <p className="text-red-500">{nameError}</p>
           </div>
 
           <div>
@@ -49,6 +56,7 @@ export default function EditComp({ onSave, onCancel, contactToEdit }) {
               onChange={(e) => setPhoneNumber(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
             />
+            <p className="text-red-500">{phoneNumberError}</p>
           </div>
 
           <div>
