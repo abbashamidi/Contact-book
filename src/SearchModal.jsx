@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EachContact from "./EachContact";
 
-export default function SearchModal({ isVisible, contacts, onClose }) {
+export default function SearchModal({ isVisible, contacts, onClose, onDelete, onEdit }) {
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    if (!isVisible) {
+      setQuery("");
+    }
+  }, [isVisible]);
 
   if (!isVisible) return null;
 
@@ -13,9 +19,8 @@ export default function SearchModal({ isVisible, contacts, onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg border border-gray-200 animate-fade-in relative h-[80vh] overflow-hidden">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-xl"
@@ -44,8 +49,8 @@ export default function SearchModal({ isVisible, contacts, onClose }) {
             <div className="grid grid-cols-1 gap-4">
               <EachContact
                 contacts={filteredContacts}
-                onDelete={() => {}}
-                onEdit={() => {}}
+                onDelete={onDelete}
+                onEdit={onEdit}
               />
             </div>
           )}
