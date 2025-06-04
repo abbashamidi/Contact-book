@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Preloader from "./Preloader";
 
 export default function AddContact({ contacts, setContacts }) {
   const [fullName, setFullName] = useState("");
@@ -8,6 +9,7 @@ export default function AddContact({ contacts, setContacts }) {
   const [description, setDescription] = useState("");
   const [fullNameError, setFullNameError] = useState("");
   const [phoneNumerError, setPhoneNumberError] = useState("");
+  const [showPreloader , setShowPreloader] = useState("");
 
   const navigate = useNavigate();
 
@@ -24,12 +26,16 @@ export default function AddContact({ contacts, setContacts }) {
     } else if (phoneNumber.trim() === "") {
       setPhoneNumberError("Field required !");
     } else {
-      setContacts([...contacts, newContact]);
+      setShowPreloader(true)
+      setTimeout(() => {
+        setContacts([...contacts, newContact]);
       setFullName("");
       setPhoneNumber("");
       setCity("");
       setDescription("");
       navigate("/contactList");
+      setShowPreloader(false)
+      }, 1100);
     }
   };
 
@@ -97,6 +103,7 @@ export default function AddContact({ contacts, setContacts }) {
           </button>
         </div>
       </div>
+      <Preloader showPreloader={showPreloader}/>
     </div>
   );
 }

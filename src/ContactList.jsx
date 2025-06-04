@@ -1,9 +1,10 @@
 import EachContact from "./EachContact";
 import { useNavigate } from "react-router-dom";
 import ConfirmDelete from "./ConfirmDelete";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditComp from "./EditComp";
 import SearchModal from "./SearchModal";
+import Preloader from "./Preloader";
 
 export default function ContactList({ contacts, setContacts }) {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function ContactList({ contacts, setContacts }) {
   const [isEditing, setIsEditing] = useState(false);
   const [contactToEdit, setContactToEdit] = useState(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showPreloader, setShowPreloader] = useState(false);
 
   const handleClickDelete = (id) => {
     setContactToDelete(id);
@@ -21,17 +23,23 @@ export default function ContactList({ contacts, setContacts }) {
   const handleEditClick = (contact) => {
     setContactToEdit(contact);
     setIsEditing(true);
-    setShowSearchModal(false); // close search modal on edit
+    setShowSearchModal(false); 
   };
 
   const handleSaveEdit = (updatedContact) => {
+    setShowPreloader(true);
     setShowSearchModal(false);
-    setContacts((prev) =>
-      prev.map((c) => (c.id === updatedContact.id ? updatedContact : c))
-    );
-    setIsEditing(false);
-    setContactToEdit(null);
+  
+    setTimeout(() => {
+      setContacts((prev) =>
+        prev.map((c) => (c.id === updatedContact.id ? updatedContact : c))
+      );
+      setShowPreloader(false);
+      setIsEditing(false);
+      setContactToEdit(null);
+    }, 1100);
   };
+  
 
   const takeToAddContact = () => {
     navigate("/addcontact");
@@ -74,11 +82,16 @@ export default function ContactList({ contacts, setContacts }) {
       {showConfirm && (
         <ConfirmDelete
           onConfirm={() => {
-            setContacts(
-              contacts.filter((contact) => contact.id !== contactToDelete)
-            );
-            setShowConfirm(false);
-            setContactToDelete(null);
+            setShowPreloader(true); 
+
+            setTimeout(() => {
+              setContacts(
+                contacts.filter((contact) => contact.id !== contactToDelete)
+              );
+              setShowConfirm(false);
+              setContactToDelete(null);
+              setShowPreloader(false);
+            }, 1100);
           }}
           onCancel={() => {
             setShowConfirm(false);
@@ -105,6 +118,7 @@ export default function ContactList({ contacts, setContacts }) {
         onEdit={handleEditClick}
         onClose={() => setShowSearchModal(false)}
       />
+      <Preloader showPreloader={showPreloader} />
     </div>
   );
 }
