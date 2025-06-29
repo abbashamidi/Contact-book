@@ -23,12 +23,10 @@ export default function ContactList({ contacts, setContacts }) {
   const handleEditClick = (contact) => {
     setContactToEdit(contact);
     setIsEditing(true);
-    setShowSearchModal(false); 
   };
 
   const handleSaveEdit = (updatedContact) => {
     setShowPreloader(true);
-    setShowSearchModal(false);
   
     setTimeout(() => {
       setContacts((prev) =>
@@ -40,7 +38,6 @@ export default function ContactList({ contacts, setContacts }) {
     }, 1100);
   };
   
-
   const takeToAddContact = () => {
     navigate("/addcontact");
   };
@@ -48,17 +45,17 @@ export default function ContactList({ contacts, setContacts }) {
   return (
     <div className="p-10 flex flex-col gap-8 min-h-screen bg-gray-50">
       <div className="flex justify-between items-center flex-wrap gap-4">
-        <h1 className="text-3xl font-bold text-gray-800">My Contacts</h1>
+        <h1 className="text-lg md:text-2xl lg:text-3xl  font-bold text-gray-800">My Contacts</h1>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={takeToAddContact}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow transition text-sm sm:text-base"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition text-sm sm:text-base"
           >
             + Add Contact
           </button>
           <button
             onClick={() => setShowSearchModal(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg shadow transition text-sm sm:text-base"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow transition text-sm sm:text-base"
           >
             Search Contact
           </button>

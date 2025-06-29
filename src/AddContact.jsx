@@ -9,7 +9,8 @@ export default function AddContact({ contacts, setContacts }) {
   const [description, setDescription] = useState("");
   const [fullNameError, setFullNameError] = useState("");
   const [phoneNumerError, setPhoneNumberError] = useState("");
-  const [showPreloader , setShowPreloader] = useState("");
+  const [showPreloader, setShowPreloader] = useState("");
+  const [contactImage, setContactImage] = useState(null);
 
   const navigate = useNavigate();
 
@@ -20,33 +21,70 @@ export default function AddContact({ contacts, setContacts }) {
       PhoneNumber: phoneNumber,
       City: city,
       Description: description,
+      Image: contactImage ? URL.createObjectURL(contactImage) : null, // store image URL
     };
+
     if (fullName.trim() === "") {
       setFullNameError("Field required !");
     } else if (phoneNumber.trim() === "") {
       setPhoneNumberError("Field required !");
     } else {
-      setShowPreloader(true)
+      setShowPreloader(true);
       setTimeout(() => {
         setContacts([...contacts, newContact]);
-      setFullName("");
-      setPhoneNumber("");
-      setCity("");
-      setDescription("");
-      navigate("/contactList");
-      setShowPreloader(false)
+        setFullName("");
+        setPhoneNumber("");
+        setCity("");
+        setDescription("");
+        navigate("/contactList");
+        setShowPreloader(false);
       }, 1100);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-semibold text-center text-gray-800">
-          Add Contact
-        </h2>
+      <div className="w-full max-w-md bg-white rounded-2xl p-6">
+        <div className="flex flex-col items-center justify-center gap-4 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800 text-center">
+            Add Contact
+          </h2>
 
-        <div className="space-y-4">
+          <div className="relative w-28 h-28 sm:w-32 sm:h-32">
+            <div className="w-full h-full rounded-full overflow-hidden border border-gray-300">
+              <img
+                src={
+                  contactImage
+                    ? URL.createObjectURL(contactImage)
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        fullName || "Contact"
+                      )}&background=0D8ABC&color=fff&rounded=true&size=128`
+                }
+                alt="Contact"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <label className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 shadow-md cursor-pointer transition">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) setContactImage(file);
+                }}
+              />
+              <img
+                src="./src/assets/AddPhoto.svg"
+                alt="Add"
+                className="w-5 h-5 invert"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="space-y-2.5">
           <div>
             <label className="block text-gray-600 mb-1">Full Name</label>
             <input
@@ -103,7 +141,7 @@ export default function AddContact({ contacts, setContacts }) {
           </button>
         </div>
       </div>
-      <Preloader showPreloader={showPreloader}/>
+      <Preloader showPreloader={showPreloader} />
     </div>
   );
 }
