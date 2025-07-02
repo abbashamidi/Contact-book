@@ -1,9 +1,46 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import EachContact from "./EachContact";
 
-export default function SearchModal({ isVisible, contacts, onClose, onDelete, onEdit }) {
+function SearchModalInput({ query, setQuery }) {
+  return (
+    <input
+      type="text"
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Search by name or phone number"
+      className="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  );
+}
+
+function SearchModalResults({ filteredContacts, onDelete, onEdit }) {
+  if (filteredContacts.length === 0) {
+    return (
+      <p className="text-gray-500 text-center">No matching contacts found.</p>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      <EachContact
+        contacts={filteredContacts}
+        onDelete={onDelete}
+        onEdit={onEdit}
+      />
+    </div>
+  );
+}
+
+export default function SearchModal({
+  isVisible,
+  contacts,
+  onClose,
+  onDelete,
+  onEdit,
+}) {
   const [query, setQuery] = useState("");
 
+  // بعد از بستن قسمت جست و جو input رو پاکسازی میکنه
   useEffect(() => {
     if (!isVisible) {
       setQuery("");
@@ -32,28 +69,14 @@ export default function SearchModal({ isVisible, contacts, onClose, onDelete, on
           Search Contact
         </h2>
 
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name or phonenumber"
-          className="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <SearchModalInput query={query} setQuery={setQuery} />
 
         <div className="overflow-y-auto max-h-[55vh] pr-2">
-          {filteredContacts.length === 0 ? (
-            <p className="text-gray-500 text-center">
-              No matching contacts found.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              <EachContact
-                contacts={filteredContacts}
-                onDelete={onDelete}
-                onEdit={onEdit}
-              />
-            </div>
-          )}
+          <SearchModalResults
+            filteredContacts={filteredContacts}
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
         </div>
       </div>
     </div>

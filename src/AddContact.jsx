@@ -1,147 +1,148 @@
+import AddContactAvatarUploader from "./AddContactAvatarUploader";
+import AddContactFormField from "./AddContactFormField";
+import Preloader from "./Preloader";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Preloader from "./Preloader";
 
 export default function AddContact({ contacts, setContacts }) {
-  const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [city, setCity] = useState("");
-  const [description, setDescription] = useState("");
-  const [fullNameError, setFullNameError] = useState("");
-  const [phoneNumerError, setPhoneNumberError] = useState("");
-  const [showPreloader, setShowPreloader] = useState("");
-  const [contactImage, setContactImage] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phoneNumber: "",
+    city: "",
+    description: "",
+    fullNameError: "",
+    phoneNumberError: "",
+    contactImage: null,
+    showPreloader: false,
+  });
 
   const navigate = useNavigate();
 
-  const addNewContact = () => {
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const addNewContact = async () => {
+    setFormData((prev) => ({
+      ...prev,
+      fullNameError: "",
+      phoneNumberError: "",
+    }));
+  
+    if (formData.fullName.trim() === "") {
+      setFormData((prev) => ({ ...prev, fullNameError: "Field required!" }));
+      return;
+    }
+    if (formData.phoneNumber.trim() === "") {
+      setFormData((prev) => ({ ...prev, phoneNumberError: "Field required!" }));
+      return;
+    }
+  
+    setFormData((prev) => ({ ...prev, showPreloader: true }));
+
+    // از این تابع برای تبدیل عکس قابل نگهداری استفاده میکنیم
+    const fileToBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+    };
+  
+
+    let imageBase64 = null;
+    if (formData.contactImage) {
+      try {
+        imageBase64 = await fileToBase64(formData.contactImage);
+      } catch (error) {
+        console.error("Error converting image to base64:", error);
+        imageBase64 = null;
+      }
+    }
+  
     const newContact = {
       id: Date.now(),
-      Name: fullName,
-      PhoneNumber: phoneNumber,
-      City: city,
-      Description: description,
-      Image: contactImage ? URL.createObjectURL(contactImage) : null, // store image URL
+      Name: formData.fullName,
+      PhoneNumber: formData.phoneNumber,
+      City: formData.city,
+      Description: formData.description,
+      Image: imageBase64,
     };
-
-    if (fullName.trim() === "") {
-      setFullNameError("Field required !");
-    } else if (phoneNumber.trim() === "") {
-      setPhoneNumberError("Field required !");
-    } else {
-      setShowPreloader(true);
-      setTimeout(() => {
-        setContacts([...contacts, newContact]);
-        setFullName("");
-        setPhoneNumber("");
-        setCity("");
-        setDescription("");
-        navigate("/contactList");
-        setShowPreloader(false);
-      }, 1100);
-    }
+  
+    setTimeout(() => {
+      setContacts([...contacts, newContact]);
+      setFormData({
+        fullName: "",
+        phoneNumber: "",
+        city: "",
+        description: "",
+        fullNameError: "",
+        phoneNumberError: "",
+        contactImage: null,
+        showPreloader: false,
+      });
+      navigate("/contactList");
+    }, 1100);
   };
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-2xl p-6">
-        <div className="flex flex-col items-center justify-center gap-4 mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 text-center">
-            Add Contact
-          </h2>
-
-          <div className="relative w-28 h-28 sm:w-32 sm:h-32">
-            <div className="w-full h-full rounded-full overflow-hidden border border-gray-300">
-              <img
-                src={
-                  contactImage
-                    ? URL.createObjectURL(contactImage)
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        fullName || "Contact"
-                      )}&background=0D8ABC&color=fff&rounded=true&size=128`
-                }
-                alt="Contact"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <label className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 shadow-md cursor-pointer transition">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) setContactImage(file);
-                }}
-              />
-              <img
-                src="./src/assets/AddPhoto.svg"
-                alt="Add"
-                className="w-5 h-5 invert"
-              />
-            </label>
-          </div>
+      <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-lg">
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Add Contact</h2>
+          <AddContactAvatarUploader
+            fullName={formData.fullName}
+            contactImage={formData.contactImage}
+            setContactImage={(image) => handleChange("contactImage", image)}
+          />
         </div>
 
         <div className="space-y-2.5">
-          <div>
-            <label className="block text-gray-600 mb-1">Full Name</label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-              placeholder="Enter full name"
-            />
-            <span className="text-sm text-red-500">{fullNameError}</span>
-          </div>
-
-          <div>
-            <label className="block text-gray-600 mb-1">Phone Number</label>
-            <input
-              type="text"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-              placeholder="Enter phone number"
-            />
-            <span className="text-sm text-red-500">{phoneNumerError}</span>
-          </div>
-
-          <div>
-            <label className="block text-gray-600 mb-1">City</label>
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-              placeholder="Enter city"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-600 mb-1">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-              rows="4"
-              placeholder="Additional details..."
-            ></textarea>
-          </div>
+          <AddContactFormField
+            label="Full Name"
+            value={formData.fullName}
+            onChange={(e) => handleChange("fullName", e.target.value)}
+            placeholder="Enter full name"
+            error={formData.fullNameError}
+          />
+          <AddContactFormField
+            label="Phone Number"
+            value={formData.phoneNumber}
+            onChange={(e) => handleChange("phoneNumber", e.target.value)}
+            placeholder="Enter phone number"
+            error={formData.phoneNumberError}
+          />
+          <AddContactFormField
+            label="City"
+            value={formData.city}
+            onChange={(e) => handleChange("city", e.target.value)}
+            placeholder="Enter city"
+          />
+          <AddContactFormField
+            label="Description"
+            value={formData.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            placeholder="Additional details..."
+            textarea
+          />
         </div>
 
-        <div className="text-center">
+        <div className="text-center mt-4">
           <button
-            onClick={() => addNewContact()}
+            onClick={addNewContact}
             className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
           >
             Save Contact
           </button>
         </div>
       </div>
-      <Preloader showPreloader={showPreloader} />
+
+      <Preloader showPreloader={formData.showPreloader} />
     </div>
   );
 }

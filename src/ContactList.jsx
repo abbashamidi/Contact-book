@@ -1,121 +1,130 @@
-import EachContact from "./EachContact";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import ContactListHeader from "./ContactListHeader";
+import ContactGrid from "./ContactGrid";
 import ConfirmDelete from "./ConfirmDelete";
-import { useEffect, useState } from "react";
 import EditComp from "./EditComp";
 import SearchModal from "./SearchModal";
 import Preloader from "./Preloader";
 
 export default function ContactList({ contacts, setContacts }) {
   const navigate = useNavigate();
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [contactToDelete, setContactToDelete] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [contactToEdit, setContactToEdit] = useState(null);
-  const [showSearchModal, setShowSearchModal] = useState(false);
-  const [showPreloader, setShowPreloader] = useState(false);
 
-  const handleClickDelete = (id) => {
-    setContactToDelete(id);
-    setShowConfirm(true);
+  const [uiState, setUIState] = useState({
+    showConfirm: false,
+    contactToDelete: null,
+    isEditing: false,
+    contactToEdit: null,
+    showSearchModal: false,
+    showPreloader: false,
+  });
+
+  const handleDeleteClick = (id) => {
+    setUIState(prev => ({
+      ...prev,
+      showConfirm: true,
+      contactToDelete: id,
+    }));
+  };
+
+  const confirmDelete = () => {
+    setUIState(prev => ({ ...prev, showPreloader: true }));
+
+    setTimeout(() => {
+      setContacts(prevContacts =>
+        prevContacts.filter(c => c.id !== uiState.contactToDelete)
+      );
+      setUIState((prev) => ({
+        ...prev,
+        showConfirm: false,
+        contactToDelete: null,
+        showPreloader: false,
+      }));
+    }, 1100);
   };
 
   const handleEditClick = (contact) => {
-    setContactToEdit(contact);
-    setIsEditing(true);
+    setUIState(prev => ({
+      ...prev,
+      contactToEdit: contact,
+      isEditing: true,
+    }));
   };
 
   const handleSaveEdit = (updatedContact) => {
-    setShowPreloader(true);
-  
+    setUIState(prev => ({ ...prev, showPreloader: true }));
+
     setTimeout(() => {
-      setContacts((prev) =>
-        prev.map((c) => (c.id === updatedContact.id ? updatedContact : c))
+      setContacts(prevContacts =>
+        prevContacts.map((c) =>
+          c.id === updatedContact.id ? updatedContact : c
+        )
       );
-      setShowPreloader(false);
-      setIsEditing(false);
-      setContactToEdit(null);
+      setUIState((prev) => ({
+        ...prev,
+        isEditing: false,
+        contactToEdit: null,
+        showPreloader: false,
+      }));
     }, 1100);
   };
-  
-  const takeToAddContact = () => {
-    navigate("/addcontact");
-  };
+
+  const goToAddContact = () => navigate("/addcontact");
 
   return (
-    <div className="p-10 flex flex-col gap-8 min-h-screen bg-gray-50">
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <h1 className="text-lg md:text-2xl lg:text-3xl  font-bold text-gray-800">My Contacts</h1>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={takeToAddContact}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition text-sm sm:text-base"
-          >
-            + Add Contact
-          </button>
-          <button
-            onClick={() => setShowSearchModal(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow transition text-sm sm:text-base"
-          >
-            Search Contact
-          </button>
-        </div>
-      </div>
+    <div className="p-6 sm:p-10 flex flex-col gap-8 min-h-screen bg-gray-50">
+      <ContactListHeader
+        onAddContact={goToAddContact}
+        onSearch={() =>
+          setUIState(prev => ({ ...prev, showSearchModal: true }))
+        }
+      />
 
-      {contacts.length === 0 ? (
-        <div className="text-center text-gray-500 mt-10 text-xl">
-          No contacts available. Start by adding one.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <EachContact
-            contacts={contacts}
-            onDelete={handleClickDelete}
-            onEdit={handleEditClick}
-          />
-        </div>
-      )}
+      <ContactGrid
+        contacts={contacts}
+        onDelete={handleDeleteClick}
+        onEdit={handleEditClick}
+      />
 
-      {showConfirm && (
+      {uiState.showConfirm && (
         <ConfirmDelete
-          onConfirm={() => {
-            setShowPreloader(true); 
-
-            setTimeout(() => {
-              setContacts(
-                contacts.filter((contact) => contact.id !== contactToDelete)
-              );
-              setShowConfirm(false);
-              setContactToDelete(null);
-              setShowPreloader(false);
-            }, 1100);
-          }}
-          onCancel={() => {
-            setShowConfirm(false);
-            setContactToDelete(null);
-          }}
+          onConfirm={confirmDelete}
+          onCancel={() =>
+            setUIState(prev => ({
+              ...prev,
+              showConfirm: false,
+              contactToDelete: null,
+            }))
+          }
         />
       )}
 
-      {isEditing && (
+      {uiState.isEditing && (
         <EditComp
-          contactToEdit={contactToEdit}
+          contactToEdit={uiState.contactToEdit}
           onSave={handleSaveEdit}
-          onCancel={() => {
-            setIsEditing(false);
-            setContactToEdit(null);
-          }}
+          onCancel={() =>
+            setUIState((prev) => ({
+              ...prev,
+              isEditing: false,
+              contactToEdit: null,
+            }))
+          }
         />
       )}
 
       <SearchModal
-        isVisible={showSearchModal}
+        isVisible={uiState.showSearchModal}
         contacts={contacts}
-        onDelete={handleClickDelete}
+        onDelete={handleDeleteClick}
         onEdit={handleEditClick}
-        onClose={() => setShowSearchModal(false)}
+        onClose={() =>
+          setUIState((prev) => ({ ...prev, showSearchModal: false }))
+        }
       />
-      <Preloader showPreloader={showPreloader} />
+
+      <Preloader showPreloader={uiState.showPreloader} />
     </div>
   );
 }
